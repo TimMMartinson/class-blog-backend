@@ -7,6 +7,7 @@ const cors = require('cors')
 const db = require('./config/db')
 
 //Routes here
+const requestLogger = require('./lib/request-logger.js')
 
 const PORT = 8000
 
