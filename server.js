@@ -25,7 +25,7 @@ const app = express()
 // Making app use all routes and utilities
 
 
-app.use(cors({ origin: `http://127.0.0.1:3000` }))
+app.use(cors({ origin: `http://localhost:3000` }))
 
 app.use(express.json())
 app.use(requestLogger)
