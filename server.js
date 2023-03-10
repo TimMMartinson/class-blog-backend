@@ -24,13 +24,13 @@ const app = express()
 // Making app use all routes and utilities
 
 // Mount user routes on root path
-app.use(userRoutes)
+
 
 app.use(cors({ origin: `http://127.0.0.1:3000` }))
 
 app.use(express.json())
 app.use(requestLogger)
-
+app.use(userRoutes)
 app.listen(PORT, () => {
 	console.log('listening on port ' + PORT)
 })
