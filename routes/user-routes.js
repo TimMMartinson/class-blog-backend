@@ -9,6 +9,7 @@ const router = express.Router()
 
 // POST /sign-up
 router.post('/sign-up', (req, res, next) => {
+    console.log('req.body:', req.body)
     bcrypt
         .hash(req.body.credentials.password, 10)
         .then(hashedPassword => {
