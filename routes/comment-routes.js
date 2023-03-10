@@ -1,28 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const Comment = require('../models/comment')
-const Post = require('../models/post')
 const auth = require('../config/auth')
 
-// CREATE a new comment for a post
-// router.post('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
-//   const comment = new Comment({
-//     content: req.body.content,
-//     user_id: req.user.id,
-//     post_id: req.params.postId
-//   })
-
-//   comment.save()
-//     .then(savedComment => {
-//       return Post.findByIdAndUpdate(req.params.postId, { $push: { comments: savedComment._id } }, { new: true })
-//     })
-//     .then(updatedPost => {
-//       res.json(updatedPost)
-//     })
-//     .catch(err => {
-//       next(err)
-//     })
-// })
 router.post('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
     const comment = new Comment({
       content: req.body.content,
