@@ -1,85 +1,86 @@
 const express = require('express')
 const router = express.Router()
 const Comment = require('../models/comment')
-const { requireToken } = require('../auth/auth')
+const Post = require('../models/post')
+const auth = require('../config/auth')
 
-// CREATE a new comment
-router.post('/', requireToken, async (req, res) => {
-  try {
-    const comment = new Comment({
-      content: req.body.content,
-      post_id: req.body.post_id,
-      user_id: req.user.id, // use the id of the authenticated user
+// CREATE a new comment for a post
+router.post('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
+  const comment = new Comment({
+    content: req.body.content,
+    user_id: req.user.id,
+    post_id: req.params.postId
+  })
+
+  comment.save()
+    .then(savedComment => {
+      return Post.findByIdAndUpdate(req.params.postId, { $push: { comments: savedComment._id } }, { new: true })
     })
-    const savedComment = await comment.save()
-    res.json(savedComment)
-  } catch (err) {
-    res.status(400).json({ message: err.message })
-  }
+    .then(updatedPost => {
+      res.json(updatedPost)
+    })
+    .catch(err => {
+      next(err)
+    })
 })
 
 // READ all comments for a post
-router.get('/post/:postId', async (req, res) => {
-  try {
-    const comments = await Comment.find({ post_id: req.params.postId }).populate('user_id', 'username') // assuming User model has a 'username' field
-    res.json(comments)
-  } catch (err) {
-    res.status(500).json({ message: err.message })
-  }
+router.get('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
+  Comment.find({ post_id: req.params.postId })
+    .populate('user_id')
+    .then(comments => {
+      res.json(comments)
+    })
+    .catch(err => {
+      next(err)
+    })
 })
 
 // READ a single comment
-router.get('/:id', async (req, res) => {
-  try {
-    const comment = await Comment.findById(req.params.id).populate('user_id', 'username') // assuming User model has a 'username' field
-    if (comment == null) {
-      return res.status(404).json({ message: 'Cannot find comment' })
-    }
-    res.json(comment)
-  } catch (err) {
-    return res.status(500).json({ message: err.message })
-  }
+router.get('/comments/:id', auth.requireToken, getComment, (req, res) => {
+  res.json(res.comment)
 })
 
 // UPDATE a comment
-router.patch('/:id', requireToken, getComment, async (req, res) => {
+router.patch('/comments/:id', auth.requireToken, getComment, (req, res, next) => {
   if (req.body.content != null) {
     res.comment.content = req.body.content
   }
-  try {
-    const updatedComment = await res.comment.save()
-    res.json(updatedComment)
-  } catch (err) {
-    res.status(400).json({ message: err.message })
-  }
+
+  res.comment.save()
+    .then(updatedComment => {
+      res.json(updatedComment)
+    })
+    .catch(err => {
+      next(err)
+    })
 })
 
 // DELETE a comment
-router.delete('/:id', requireToken, getComment, async (req, res) => {
-  try {
-    await res.comment.remove()
-    res.json({ message: 'Comment deleted' })
-  } catch (err) {
-    res.status(500).json({ message: err.message })
-  }
+router.delete('/comments/:id', auth.requireToken, getComment, (req, res, next) => {
+  res.comment.remove()
+    .then(() => {
+      res.json({ message: 'Comment deleted' })
+    })
+    .catch(err => {
+      next(err)
+    })
 })
 
 // middleware function to get a single comment by id
-async function getComment(req, res, next) {
-  try {
-    const comment = await Comment.findById(req.params.id)
-    if (comment == null) {
-      return res.status(404).json({ message: 'Cannot find comment' })
-    }
-    // check if the authenticated user is the author of the comment
-    if (comment.user_id.toString() !== req.user.id) {
-      return res.status(401).json({ message: 'Unauthorized' })
-    }
-    res.comment = comment
-    next()
-  } catch (err) {
-    return res.status(500).json({ message: err.message })
-  }
+function getComment(req, res, next) {
+  Comment.findById(req.params.id)
+    .populate('user_id')
+    .then(comment => {
+      if (comment == null) {
+        return res.status(404).json({ message: 'Cannot find comment' })
+      }
+      res.comment = comment
+      next()
+    })
+    .catch(err => {
+      next(err)
+    })
 }
 
 module.exports = router
