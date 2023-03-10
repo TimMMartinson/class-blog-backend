@@ -57,7 +57,7 @@ router.patch('/posts/:id', auth.requireToken, getPost, (req, res, next) => {
 
 // DELETE a post
 router.delete('/posts/:id', auth.requireToken, getPost, (req, res, next) => {
-  res.post.remove()
+  Post.deleteOne({ _id: req.params.id })
     .then(() => {
       res.json({ message: 'Post deleted' })
     })
