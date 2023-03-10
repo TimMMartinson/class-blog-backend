@@ -6,6 +6,7 @@ const db = require('./config/db')
 //Routes here
 const userRoutes = require('./routes/user-routes')
 const postRoutes = require('./routes/post-routes')
+const commentRoutes = require('./routes/comment-routes')
 // import request logger
 const requestLogger = require('./lib/request-logger.js')
 
@@ -30,6 +31,7 @@ app.use(express.json())
 app.use(requestLogger)
 app.use(userRoutes)
 app.use(postRoutes)
+app.use(commentRoutes)
 app.listen(PORT, () => {
 	console.log('listening on port ' + PORT)
 })

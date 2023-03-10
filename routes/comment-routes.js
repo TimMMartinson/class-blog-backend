@@ -5,24 +5,40 @@ const Post = require('../models/post')
 const auth = require('../config/auth')
 
 // CREATE a new comment for a post
-router.post('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
-  const comment = new Comment({
-    content: req.body.content,
-    user_id: req.user.id,
-    post_id: req.params.postId
-  })
+// router.post('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
+//   const comment = new Comment({
+//     content: req.body.content,
+//     user_id: req.user.id,
+//     post_id: req.params.postId
+//   })
 
-  comment.save()
-    .then(savedComment => {
-      return Post.findByIdAndUpdate(req.params.postId, { $push: { comments: savedComment._id } }, { new: true })
+//   comment.save()
+//     .then(savedComment => {
+//       return Post.findByIdAndUpdate(req.params.postId, { $push: { comments: savedComment._id } }, { new: true })
+//     })
+//     .then(updatedPost => {
+//       res.json(updatedPost)
+//     })
+//     .catch(err => {
+//       next(err)
+//     })
+// })
+router.post('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
+    const comment = new Comment({
+      content: req.body.content,
+      user_id: req.user.id,
+      post_id: req.params.postId
     })
-    .then(updatedPost => {
-      res.json(updatedPost)
-    })
-    .catch(err => {
-      next(err)
-    })
-})
+  
+    comment.save()
+      .then(savedComment => {
+        res.json(savedComment)
+      })
+      .catch(err => {
+        next(err)
+      })
+  })  
+  
 
 // READ all comments for a post
 router.get('/posts/:postId/comments', auth.requireToken, (req, res, next) => {
@@ -58,7 +74,7 @@ router.patch('/comments/:id', auth.requireToken, getComment, (req, res, next) =>
 
 // DELETE a comment
 router.delete('/comments/:id', auth.requireToken, getComment, (req, res, next) => {
-  res.comment.remove()
+    Comment.deleteOne({ _id: req.params.id })
     .then(() => {
       res.json({ message: 'Comment deleted' })
     })
