@@ -43,7 +43,7 @@ router.post('/sign-in', (req, res, next) => {
         }
 
         const token = createUserToken(req, user)
-        res.status(200).json({ token })
+        res.status(200).json({ token, user })
     })
     .catch((err) => {
         next(err)
