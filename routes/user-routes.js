@@ -2,8 +2,7 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 
 const User = require('../models/user')
-
-const { createUserToken } = require('../config/auth')
+const { createUserToken, requireToken } = require('../config/auth')
 
 const router = express.Router()
 
@@ -49,6 +48,15 @@ router.post('/sign-in', (req, res, next) => {
     .catch((err) => {
         next(err)
     })
+})
+
+// GET current user
+router.get('/user', requireToken, (req, res, next) => {
+    User.findById(req.user.id)
+        .then(user => {
+            res.json(user)
+        })
+        .catch(next)
 })
 
 module.exports = router
