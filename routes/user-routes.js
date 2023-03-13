@@ -15,6 +15,7 @@ router.post('/sign-up', (req, res, next) => {
         .then(hashedPassword => {
             return {
                 email: req.body.credentials.email,
+                username: req.body.credentials.username,
                 password: hashedPassword
             }
         })
@@ -24,6 +25,7 @@ router.post('/sign-up', (req, res, next) => {
         })
         .catch(next)
 })
+
 
 // POST /sign-in
 router.post('/sign-in', (req, res, next) => {
